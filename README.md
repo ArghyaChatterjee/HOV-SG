@@ -1,46 +1,42 @@
-# HOV-SG
-[![Static Badge](https://img.shields.io/badge/-arXiv-B31B1B?logo=arxiv)](https://arxiv.org/abs/2403.17846)
-[![Static Badge](https://img.shields.io/badge/Project-Page-a)](https://hovsg.github.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Static Badge](https://img.shields.io/badge/-Video-FF0000?logo=youtube)](https://hovsg.github.io/static/images/hovsg_rss_final.mp4)
+# HOV-SG: Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation
 
 
-
-This repository is the official implementation of the paper:
-
-> **Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation**
->
-> [Abdelrhman Werby]()&ast;, [Chenguang Huang](http://www2.informatik.uni-freiburg.de/~huang/)&ast;, [Martin Büchner](https://rl.uni-freiburg.de/people/buechner)&ast;, [Abhinav Valada](https://rl.uni-freiburg.de/people/valada), and [Wolfram Burgard](https://www.utn.de/person/wolfram-burgard/). <br>
-> &ast;Equal contribution. <br> 
-> 
-> *arXiv preprint arXiv:2403.17846*, 2024 <br>
-> (Accepted for *Robotics: Science and Systems (RSS), Delft, Netherlands*, 2024.)
 
 <p align="center">
   <img src="media/teaser-hovsg-white.png" alt="HOV-SG allows the construction of accurate, open-vocabulary 3D scene graphs for large-scale and multi-story environments and enables robots to effectively navigate in them with language instructions." width="600" />
 </p>
 
-## 📰 Major Updates
-- **[29 Aug 2024]** **We added `hm3dsem_walks` dataset generation and hierarchical scene graph evaluation code.** <br>
-Please review the updated code structure and newly added dependencies for dataset construction. <br><br>
-- [01 Jul 2024] Initial release of HOV-SG including mapping and graph construction engine.
+## Requirements
+This was done on Ubuntu 22.04 with cuda 12.1 and python 3.10 and ROS2 humble.
 
 ## 🏗 Setup
-1. Clone and set up the HOV-SG repository
+
+### Install the virtual environment
+Navigate to HOV-SG repo and create a virtual environment.
 ```bash
-git clone https://github.com/hovsg/HOV-SG.git
-cd HOV-SG
-
-# set up virtual environment and install habitat-sim afterwards separately to avoid errors.
-conda env create -f environment.yaml
-conda activate hovsg
-conda install habitat-sim -c conda-forge -c aihabitat
-
-# set up the HOV-SG python package
-pip install -e .
+git clone https://github.com/ihmcrobotics/ihmc-scene-graph-pipeline.git
+cd ihmc-scene-graph-pipeline/open_vocab_scene_graphs/HOV-SG/
+python3.10 -m venv hov_sg_venv
+source hov_sg_venv/bin/activate
+pip3 install --upgrade pip setuptools wheel
+pip3 install -r requirements.txt
 ```
 
-### OpenCLIP
+### Install Habitat-Sim
+Inside the virtual environment, install habitat-sim.
+```bash
+git clone --branch stable https://github.com/facebookresearch/habitat-sim.git
+cd habitat-sim
+pip3 install . -v
+```
+
+### Install HOV-SG as a python package
+```bash
+cd ..
+pip3 install -e .
+```
+
+### Download OpenCLIP
 HOV-SG uses the Open CLIP model to extract features from RGB-D frames. To download the Open CLIP model checkpoint `CLIP-ViT-H-14-laion2B-s32B-b79K` please refer to [Open CLIP](https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K).
 ```bash
 mkdir checkpoints
@@ -48,11 +44,11 @@ wget https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K/resolve/main/o
 ```
 Another option is to use the OVSeg fine-tuned Open CLIP model, which is available under [here](https://github.com/facebookresearch/ov-seg):
 ```bash
-pip install gdown
+pip3 install gdown
 gdown --fuzzy https://drive.google.com/file/d/17C9ACGcN7Rk4UT4pYD_7hn3ytTa3pFb5/view -O checkpoints/ovseg_clip.pth
 ```
 
-### SAM
+### Download SAM
 HOV-SG uses [SAM](https://github.com/facebookresearch/segment-anything) to generate class-agnostic masks for the RGB-D frames. To download the SAM model checkpoint `sam_v2` execute the following:
 ```bash
 wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth -O checkpoints/sam_vit_h_4b8939.pth
@@ -61,15 +57,22 @@ wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth -O che
 ## 🖼️ Dataset Preparation
 
 ### Habitat Matterport 3D Semantics
-HOV-SG takes posed RGB-D sequences as input. In order to produce hierarchical multi-story scenes we make use of the Habitat 3D Semantics dataset ([HM3DSem](https://aihabitat.org/datasets/hm3d-semantics/)). 
+HOV-SG takes posed RGB-D sequences as input. In order to produce hierarchical multi-story scenes we make use of the Habitat 3D Semantics dataset ([HM3DSem](https://aihabitat.org/datasets/hm3d-semantics/)). Download the [Habitat Matterport 3D Semantics](https://github.com/matterport/habitat-matterport-3dresearch) dataset. YOu have to download these specific datasets:
 
-- Download the [Habitat Matterport 3D Semantics](https://github.com/matterport/habitat-matterport-3dresearch) dataset.
-    <details>
-    <summary>Make sure that the raw HM3D dataset has the following structure:</summary>
+- hm3d-val-glb-v0.2.tar	val	glb	https://api.matterport.com/resources/habitat/hm3d-val-glb-v0.2.tar	4G
+
+- hm3d-val-habitat-v0.2.tar	val	habitat	https://api.matterport.com/resources/habitat/hm3d-val-habitat-v0.2.tar	3.3G
+
+- hm3d-val-semantic-annots-v0.2.tar	val	semantic-annots	https://api.matterport.com/resources/habitat/hm3d-val-semantic-annots-v0.2.tar	2.0G
+
+- hm3d-val-semantic-configs-v0.2.tar	val	semantic-configs	https://api.matterport.com/resources/habitat/hm3d-val-semantic-configs-v0.2.tar	40K
+
+Make sure that the raw HM3D dataset has the following structure:
     
-    ```
-    ├── hm3d
-    │   ├── hm3d_annotated_basis.scene_dataset_config.json # this file is necessary
+```
+  data
+    ├── hm3dsem
+    │   ├── hm3d_annotated_basis.scene_dataset_config.json
     │   ├── val
     │   │   └── 00824-Dd4bFSTQ8gi
     │   │         ├── Dd4bFSTQ8gi.basis.glb
@@ -77,12 +80,19 @@ HOV-SG takes posed RGB-D sequences as input. In order to produce hierarchical mu
     │   │         ├── Dd4bFSTQ8gi.glb
     │   │         ├── Dd4bFSTQ8gi.semantic.glb
     │   │         └── Dd4bFSTQ8gi.semantic.txt
-            ...
-        ...
+    |   ...
+    ├── hm3dsem_poses
+    |   ├── 00824-Dd4bFSTQ8gi.txt
+    |   ├── ...
+    |   ├── Per_Scene_Floor_Sep.csv
+    |   ├── ...
+    └── hm3dsem_walks
+          └── val
+              └── 00824-Dd4bFSTQ8gi
+              ├── ...
     ...
-    ```
+```
 
-    </details>
 We used the following scenes from the Habitat Matterport 3D Semantics dataset in our evaluation:
 <details>
   <summary>Show Scenes ID</summary>
@@ -100,13 +110,13 @@ We used the following scenes from the Habitat Matterport 3D Semantics dataset in
 
 1. Our method requires posed input data. Because of that, we recorded trajectories for each sequence we evaluate on. We provide a script (`hovsg/data/hm3dsem/gen_hm3dsem_walks_from_poses.py`) that turns a set of camera poses (`hovsg/data/hm3dsem/metadata/poses`) into a sequence of RGB-D observations using the [habitat-sim](https://github.com/facebookresearch/habitat-sim) simulator. The output includes RGB, depth, poses and frame-wise semantic/panoptic ground truth:
 ```bash
-  python data/habitat/gen_hm3dsem_from_poses.py --dataset_dir <hm3dsem_dir> --save_dir data/hm3dsem_walks/
+  python3 hovsg/data/habitat/gen_hm3dsem_walks_from_poses.py --dataset_dir hovsg/data/hm3dsem --save_dir hovsg/data/hm3dsem_walks/
 ```
 
 2. Secondly, we construct a new hierarchical graph-structured dataset that is called `hm3dsem_walks` that includes ground truth based on all observations recorded. To produce this ground-truth data please execute the following: First, define the following config paths: `main.package_path`, `main.dataset_path`, `main.raw_data_path`, and `main.save_path` under `config/create_graph.yaml`. For each scene, define the `main.scene_id`, `main.split`. Next, execute the following to obtain floor-, region-, and object-level ground truth data per scene. We utilize every recorded frame without skipping (see parameter `dataset.hm3dsem.gt_skip_frames`) and recommend 128 GB of RAM to compile this as the scenes differ in size:
 ```bash
 cd HOV-SG
-python hovsg/data/hm3dsem/create_hm3dsem_walks_gt.py
+python3 hovsg/data/hm3dsem/create_hm3dsem_walks_gt.py
 ```
 
 To evaluate semantic segmentation cababilities, we used [ScanNet](http://www.scan-net.org/) and [Replica](https://github.com/facebookresearch/Replica-Dataset).
@@ -208,14 +218,15 @@ The Data folder should have the following structure:
 
 
 
-## :rocket: Run 
+## Demo Usage
 
 ### Create scene graphs (only for Habitat Matterport 3D Semantics):
+In `creat_graph.yaml` inside `config` folder,  the `skip_frame` paramter is set to `10` and `merge_type` parameter to `hierarchical`. This will skip every 10 frames and then process the next frame (for 2000 frames, it will end up processing 200 frames for the scene graph generation) and `merge_type` setting is important since `sequential` doesn't work sometimes for low configuration pc's.  
+
 ```bash
-python application/create_graph.py main.dataset=hm3dsem main.dataset_path=data/hm3dsem_walks/val/00824-Dd4bFSTQ8gi/ main.save_path=data/scene_graphs/00824-Dd4bFSTQ8gi
+python3 application/create_graph.py main.dataset=hm3dsem main.dataset_path=hovsg/data/hm3dsem_walks/ main.save_path=hovsg/data/scene_graphs/
 ```
-<details>
-  <summary>This will generate a scene graph for the specified RGB-D sequence and save it. The following files are generated:</summary>
+This will generate a scene graph for the specified RGB-D sequence and save it. The following files are generated:</summary>
 
 ```
 ├── graph
@@ -241,13 +252,19 @@ python application/create_graph.py main.dataset=hm3dsem main.dataset_path=data/h
 ├── full_pcd.ply
 ├── masked_pcd.ply
 ```
-The `graph` folder contains the generated scene graph hierarchy, the first number in the file name represents the floor number, the second number represents the room number, and the third number represents the object number. The `tmp` folder holds intermediate results obtained throughout graph construction. The `full_feats.pt` and `mask_feats.pt` contain the features extracted from the RGBD frames using the Open CLIP and SAM models. the former contains per point features and the latter contains the features for the object masks. The `full_pcd.ply` and `masked_pcd.ply` contain the point cloud representation of the RGB-D frames and the instance masks of all objects, respectively.
+The `graph` folder contains the generated scene graph hierarchy: 
+- The first number in the file name represents the floor number, 
+- The second number represents the room number, and 
+- The third number represents the object number. 
+- The `tmp` folder holds intermediate results obtained throughout graph construction. 
+- The `full_feats.pt` and `mask_feats.pt` contain the features extracted from the RGBD frames using the Open CLIP and SAM models. the former contains per point features and the latter contains the features for the object masks. 
+- The `full_pcd.ply` and `masked_pcd.ply` contain the point cloud representation of the RGB-D frames and the instance masks of all objects, respectively.
 
 </details>
 
 ### Visualize scene graph
 ```bash
-python application/visualize_graph.py graph_path=data/scene_graphs/hm3dsem/00824-Dd4bFSTQ8gi/graph
+python3 application/visualize_graph.py graph_path=data/scene_graphs/hm3dsem/00824-Dd4bFSTQ8gi/graph
 ```
 ![hovsg_graph_vis](media/hovsg_graph_vis.gif)
 
@@ -280,32 +297,6 @@ python application/eval/evaluate_sem_seg.py dataset=replica scene_name=office0 f
 - Define the scene identifiers and paths of ground truth and the predicted scene graph in the `config/eval_graph.yaml`.
 - Run the graph evaluation method:
 ```bash
-python application/eval/evaluate_graph.py 
+python3 application/eval/evaluate_graph.py 
 ```
 
-## 📔 Abstract
-
-Recent open-vocabulary robot mapping methods enrich dense geometric maps with pre-trained visual-language features. While these maps allow for the prediction of point-wise saliency maps when queried for a certain language concept, largescale environments and abstract queries beyond the object level still pose a considerable hurdle, ultimately limiting languagegrounded robotic navigation. In this work, we present HOVSG, a hierarchical open-vocabulary 3D scene graph mapping approach for language-grounded indoor robot navigation. Leveraging open-vocabulary vision foundation models, we first obtain state-of-the-art open-vocabulary segment-level maps in 3D and subsequently construct a 3D scene graph hierarchy consisting of floor, room, and object concepts, each enriched with openvocabulary features. Our approach is able to represent multistory buildings and allows robotic traversal of those using a cross-floor Voronoi graph. HOV-SG is evaluated on three distinct datasets and surpasses previous baselines in open-vocabulary semantic accuracy on the object, room, and floor level while producing a 75% reduction in representation size compared to dense open-vocabulary maps. In order to prove the efficacy and generalization capabilities of HOV-SG, we showcase successful long-horizon language-conditioned robot navigation within realworld multi-story environments. 
-
-If you find our work useful, please consider citing our paper:
-```
-@article{werby23hovsg,
-Author = {Abdelrhman Werby and Chenguang Huang and Martin Büchner and Abhinav Valada and Wolfram Burgard},
-Title = {Hierarchical Open-Vocabulary 3D Scene Graphs for Language-Grounded Robot Navigation},
-Year = {2024},
-journal = {Robotics: Science and Systems},
-} 
-```
-
-## 👩‍⚖️  License
-
-For academic usage, the code is released under the [MIT](https://opensource.org/licenses/MIT) license.
-For any commercial purpose, please contact the authors.
-
-
-## 🙏 Acknowledgment
-
-This work was funded by the German Research Foundation
-(DFG) Emmy Noether Program grant number 468878300, the
-BrainLinks-BrainTools Center of the University of Freiburg,
-and an academic grant from NVIDIA.
