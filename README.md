@@ -57,7 +57,7 @@ wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth -O che
 
 ## Dataset Preparation
 
-HOV-SG takes posed RGB-D sequences as input. In order to produce hierarchical multi-story scenes we make use of the Habitat MatterPort 3D Semantics dataset ([HM3DSem](https://aihabitat.org/datasets/hm3d-semantics/)). Download the [Habitat Matterport 3D Semantics](https://github.com/matterport/habitat-matterport-3dresearch) dataset. YOu have to download these specific datasets:
+HOV-SG takes posed RGB-D sequences as input. In order to produce hierarchical multi-story scenes we make use of the Habitat MatterPort 3D Semantics dataset ([HM3DSem](https://aihabitat.org/datasets/hm3d-semantics/)). Download the [Habitat Matterport 3D Semantics](https://github.com/matterport/habitat-matterport-3dresearch) dataset. You have to download these specific datasets:
 
 - [hm3d-val-glb-v0.2.tar](https://api.matterport.com/resources/habitat/hm3d-val-glb-v0.2.tar)	val	glb	4G
 
