@@ -9,7 +9,7 @@
 ## Requirements
 This was done on Ubuntu 22.04 with cuda 12.1 and python 3.10 and ROS2 humble.
 
-## 🏗 Setup
+## Setup
 
 ### Install the virtual environment
 Navigate to HOV-SG repo and create a virtual environment.
@@ -54,7 +54,7 @@ HOV-SG uses [SAM](https://github.com/facebookresearch/segment-anything) to gener
 wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth -O checkpoints/sam_vit_h_4b8939.pth
 ```
 
-## 🖼️ Dataset Preparation
+## Dataset Preparation
 
 ### Habitat Matterport 3D Semantics
 HOV-SG takes posed RGB-D sequences as input. In order to produce hierarchical multi-story scenes we make use of the Habitat 3D Semantics dataset ([HM3DSem](https://aihabitat.org/datasets/hm3d-semantics/)). Download the [Habitat Matterport 3D Semantics](https://github.com/matterport/habitat-matterport-3dresearch) dataset. YOu have to download these specific datasets:
@@ -94,9 +94,7 @@ Make sure that the raw HM3D dataset has the following structure:
 ```
 
 We used the following scenes from the Habitat Matterport 3D Semantics dataset in our evaluation:
-<details>
-  <summary>Show Scenes ID</summary>
-  
+```
   1. `00824-Dd4bFSTQ8gi`
   2. `00829-QaLdnwvtxbs`
   3. `00843-DYehNKdT76V`
@@ -105,8 +103,7 @@ We used the following scenes from the Habitat Matterport 3D Semantics dataset in
   6. `00873-bxsVRursffK`
   7. `00877-4ok3usBNeis`
   8. `00890-6s7QHgap2fW`
-
-</details>
+```
 
 1. Our method requires posed input data. Because of that, we recorded trajectories for each sequence we evaluate on. We provide a script (`hovsg/data/hm3dsem/gen_hm3dsem_walks_from_poses.py`) that turns a set of camera poses (`hovsg/data/hm3dsem/metadata/poses`) into a sequence of RGB-D observations using the [habitat-sim](https://github.com/facebookresearch/habitat-sim) simulator. The output includes RGB, depth, poses and frame-wise semantic/panoptic ground truth:
 ```bash
@@ -120,19 +117,17 @@ python3 hovsg/data/hm3dsem/create_hm3dsem_walks_gt.py
 ```
 
 To evaluate semantic segmentation cababilities, we used [ScanNet](http://www.scan-net.org/) and [Replica](https://github.com/facebookresearch/Replica-Dataset).
+
 ### ScanNet
 To get an RGBD sequence for ScanNet, download the ScanNet dataset from the [official website](http://www.scan-net.org/). The dataset contains RGB-D frames compressed as .sens files. To extract the frames, use the [SensReader/python](https://github.com/ScanNet/ScanNet/blob/master/SensReader/python).
 We used the following scenes from the ScanNet dataset:
-
-<details>
-  <summary>Show Scenes ID</summary>
-
+```
   1. `scene0011_00`
   2. `scene0050_00`
   2. `scene0231_00`
   3. `scene0378_00`
   4. `scene0518_00`
-</details>
+```
 
 ### Replica
 To get an RGBD sequence for Replica, Instead of the original Replica dataset, download the scanned RGB-D trajectories of the Replica dataset provided by [Nice-SLAM](https://github.com/cvg/nice-slam). It contains rendered trajectories using the mesh models provided by the original Replica datasets. 
@@ -147,10 +142,8 @@ To evaluate against the ground truth semantics labels, you also need also to dow
 git clone https://github.com/facebookresearch/Replica-Dataset.git data/Replica-Dataset
 chmod +x data/Replica-Dataset/download.sh && data/Replica-Dataset/download.sh data/Replica_original
 ```
-We only used the following scenes from the Replica dataset:
-<details>
-  <summary>Show Scenes ID</summary>
-  
+We only used the following Scene IDs from the Replica dataset:
+```
   1. `office0`
   2. `office1`
   3. `office2`
@@ -159,14 +152,10 @@ We only used the following scenes from the Replica dataset:
   6. `room0`
   7. `room1`
   8. `room2`
+```
 
-</details>
-
-## 📂 Datasets file strutcre
+## Datasets file strutcre
 The Data folder should have the following structure:
-
-<details>
-  <summary>Show data folder structure</summary>
   
 ```
 ├── hm3dsem_walks
@@ -213,10 +202,6 @@ The Data folder should have the following structure:
 │   │   │   │   ├── intrinsics_depth.txt
 │   │   ├── ..
 ```
-
-</details>
-
-
 
 ## Demo Usage
 
@@ -299,4 +284,3 @@ python application/eval/evaluate_sem_seg.py dataset=replica scene_name=office0 f
 ```bash
 python3 application/eval/evaluate_graph.py 
 ```
-
