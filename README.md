@@ -7,7 +7,7 @@
 </p>
 
 ## Requirements
-This was done on Ubuntu 22.04 with cuda 12.1 and python 3.10 and ROS2 humble.
+This was done on Ubuntu 22.04 with cuda 12.1 and python 3.10.
 
 ## Setup
 
