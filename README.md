@@ -14,8 +14,8 @@ This was done on Ubuntu 22.04 with cuda 12.1 and python 3.10.
 ### Install the virtual environment
 Navigate to HOV-SG repo and create a virtual environment.
 ```bash
-git clone https://github.com/ihmcrobotics/ihmc-scene-graph-pipeline.git
-cd ihmc-scene-graph-pipeline/open_vocab_scene_graphs/HOV-SG/
+git clone https://github.com/ArghyaChatterjee/HOV-SG.git
+cd HOV-SG/
 python3.10 -m venv hov_sg_venv
 source hov_sg_venv/bin/activate
 pip3 install --upgrade pip setuptools wheel
@@ -30,7 +30,8 @@ cd habitat-sim
 pip3 install . -v
 ```
 
-### Install HOV-SG as a python package
+### Install HOV-SG 
+This step will install the HOV-SG as a python package:
 ```bash
 cd ..
 pip3 install -e .
